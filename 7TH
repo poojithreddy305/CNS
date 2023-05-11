@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char ciphertext[] = "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡8†83(88)5†;46(;88*96*?;8)‡(;485);5†2:‡(;4956*2(5—4)8¶8*;4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81 (‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?;";
+    int freq[256] = {0}; // Initialize frequency array to zero
+    int len = strlen(ciphertext);
+
+    // Calculate frequency of each character in the ciphertext
+    for (int i = 0; i < len; i++) {
+        freq[ciphertext[i]]++;
+    }
+
+    // Find the most frequent character in the ciphertext
+    char most_frequent = 0;
+    int max_freq = 0;
+    for (int i = 0; i < 256; i++) {
+        if (freq[i] > max_freq) {
+            max_freq = freq[i];
+            most_frequent = i;
+        }
+    }
+
+    // Assume that the most frequent character is 'E' and calculate the shift
+    int shift = most_frequent - 'E';
+
+    // Decrypt the ciphertext using the shift
+    for (int i = 0; i < len; i++) {
+        if (ciphertext[i] >= 'A' && ciphertext[i] <= 'Z') {
+            // Decrypt uppercase letters
+            ciphertext[i] = ((ciphertext[i] - 'A' - shift + 26) % 26) + 'A';
+        } else if (ciphertext[i] >= 'a' && ciphertext[i] <= 'z') {
+            // Decrypt lowercase letters
+            ciphertext[i] = ((ciphertext[i] - 'a' - shift + 26) % 26) + 'a';
+        }
+    }
+
+    // Print the decrypted plaintext
+    printf("Decrypted plaintext: %s\n", ciphertext);
+
+    return 0;
+}
