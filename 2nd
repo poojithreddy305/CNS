@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+int main() {
+  char message[1000];
+  char plaintext_alphabet[] = "abcdefghijklmnopqrstuvwxyz";
+  char ciphertext_alphabet[] = "xmcvbnlkjhgfdsapoiuytrewqz";
+  int i, j;
+
+  // ask user for message
+  printf("Enter message to encrypt: ");
+  fgets(message, 1000, stdin);
+
+  // iterate through each character in message
+  for (i = 0; message[i] != '\0'; i++) {
+    // check if character is a letter
+    if (isalpha(message[i])) {
+      // find index of character in plaintext alphabet
+      for (j = 0; j < 26; j++) {
+        if (tolower(message[i]) == plaintext_alphabet[j]) {
+          // substitute character with corresponding ciphertext letter
+          if (isupper(message[i])) {
+            message[i] = toupper(ciphertext_alphabet[j]);
+          } else {
+            message[i] = ciphertext_alphabet[j];
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // print encrypted message
+  printf("Encrypted message: %s\n", message);
+
+  return 0;
+}
