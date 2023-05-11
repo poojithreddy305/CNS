@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+// function to generate key string
+char *generate_key(char *key, char *message) {
+  int i, j;
+  char *new_key = (char *) malloc(strlen(message) * sizeof(char));
+
+  for (i = 0, j = 0; i < strlen(message); i++) {
+    if (isalpha(message[i])) {
+      new_key[i] = toupper(key[j % strlen(key)]);
+      j++;
+    }
+    else {
+      new_key[i] = message[i];
+    }
+  }
+  new_key[i] = '\0';
+  return new_key;
+}
+
+int main() {
+  char message[1000];
+  char key[100];
+  char *new_key;
+  int i, j;
+  int shift;
+
+  // ask user for message and key
+  printf("Enter message to encrypt: ");
+  fgets(message, 1000, stdin);
+  printf("Enter key: ");
+  fgets(key, 100, stdin);
+
+  // convert message and key to uppercase
+  for (i = 0; message[i] != '\0'; i++) {
+    message[i] = toupper(message[i]);
+  }
+  for (i = 0; key[i] != '\0'; i++) {
+    key[i] = toupper(key[i]);
+  }
+
+  // generate new key string based on message and key
+  new_key = generate_key(key, message);
+
+  // encrypt message using polyalphabetic substitution cipher
+  for (i = 0, j = 0; message[i] != '\0'; i++) {
+    if (isalpha(message[i])) {
+      shift = new_key[j] - 'A';
+      printf("%c", ((message[i] - 'A' + shift) % 26) + 'A');
+      j++;
+    }
+    else {
+      printf("%c", message[i]);
+    }
+  }
+
+  // free dynamically allocated memory
+  free(new_key);
+
+  return 0;
+}
