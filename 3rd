@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+// function to remove duplicate letters from a string
+void remove_duplicates(char *str) {
+  int i, j, k;
+  int len = strlen(str);
+
+  for (i = 0; i < len; i++) {
+    for (j = i + 1; str[j] != '\0'; j++) {
+      if (str[j] == str[i]) {
+        // remove duplicate letter from string
+        for (k = j; k < len; k++) {
+          str[k] = str[k + 1];
+        }
+        len--;
+        j--;
+      }
+    }
+  }
+}
+
+int main() {
+  char message[1000];
+  char key[100];
+  char matrix[5][5];
+  int i, j, k;
+  char c1, c2;
+  int r1, c_1, r2, c2_2;
+
+  // ask user for message and key
+  printf("Enter message to encrypt: ");
+  fgets(message, 1000, stdin);
+  printf("Enter keyword: ");
+  fgets(key, 100, stdin);
+
+  // convert message and key to uppercase
+  for (i = 0; message[i] != '\0'; i++) {
+    message[i] = toupper(message[i]);
+  }
+  for (i = 0; key[i] != '\0'; i++) {
+    key[i] = toupper(key[i]);
+  }
+
+  // remove spaces and duplicate letters from key
+  remove_duplicates(key);
+  for (i = 0, j = 0; key[i] != '\0'; i++) {
+    if (isalpha(key[i])) {
+      matrix[j / 5][j % 5] = key[i];
+      j++;
+    }
+  }
+
+  // fill remaining matrix positions with unused letters of the alphabet
+  for (c1 = 'A'; c1 <= 'Z'; c1++) {
+    if (c1 == 'J') {
+      continue;
+    }
+    for (i = 0; i < 5; i++) {
+      for (j = 0; j < 5; j++) {
+        if (matrix[i][j] == c1 || matrix[i][j] == '\0') {
+          break;
+        }
+      }
+      if (j < 5 && matrix[i][j] == '\0') {
+        matrix[i][j] = c1;
+      }
+    }
+  }
+
+  // encrypt message two letters at a time using matrix
+  for (i = 0; message[i] != '\0'; i += 2) {
+    // find row and column of first letter in matrix
+    for (j = 0; j < 5; j++) {
+      for (k = 0; k < 5; k++) {
+        if (matrix[j][k] == message[i]) {
+          r1 = j;
+          c_1 = k;
+          break;
+        }
+      }
+    }
+    // find row and column of second letter in matrix
+    for (j = 0; j < 5; j++) {
+      for (k = 0; k < 5; k++) {
+        if (matrix[j][k] == message[i + 1]) {
+          r2 = j;
+          c2_2 = k;
+          break;
+        }
+      }
+    }
+    // encrypt
