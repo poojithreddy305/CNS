@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+int main() {
+  char message[1000];
+  int shift, i;
+
+  // ask user for message and shift value
+  printf("Enter message to encrypt: ");
+  fgets(message, 1000, stdin);
+  printf("Enter shift value (1-25): ");
+  scanf("%d", &shift);
+
+  // ensure shift value is within range
+  if (shift < 1 || shift > 25) {
+    printf("Shift value must be between 1 and 25.\n");
+    return 1;
+  }
+
+  // iterate through each character in message
+  for (i = 0; message[i] != '\0'; i++) {
+    // check if character is a letter
+    if (isalpha(message[i])) {
+      // check if character is uppercase or lowercase
+      if (isupper(message[i])) {
+        // shift uppercase letter by shift value
+        message[i] = ((message[i] - 'A') + shift) % 26 + 'A';
+      } else {
+        // shift lowercase letter by shift value
+        message[i] = ((message[i] - 'a') + shift) % 26 + 'a';
+      }
+    }
+  }
+
+  // print encrypted message
+  printf("Encrypted message: %s\n", message);
+
+  return 0;
+}
