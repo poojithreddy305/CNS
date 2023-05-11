@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char plaintext[] = "the quick brown fox jumps over the lazy dog";
+    char keyword[] = "CIPHER";
+    char ciphertext[1000];
+
+    // Generate the cipher sequence from the keyword and unused letters
+    char cipher_seq[26];
+    int index = 0;
+
+    for (int i = 0; i < strlen(keyword); i++) {
+        cipher_seq[index++] = keyword[i];
+    }
+
+    for (char c = 'A'; c <= 'Z'; c++) {
+        if (strchr(keyword, c) == NULL) {
+            cipher_seq[index++] = c;
+        }
+    }
+
+    // Encrypt the plaintext using the cipher sequence
+    int len_plaintext = strlen(plaintext);
+    for (int i = 0; i < len_plaintext; i++) {
+        if (plaintext[i] >= 'a' && plaintext[i] <= 'z') {
+            // Encrypt lowercase letters
+            ciphertext[i] = cipher_seq[plaintext[i] - 'a' + 6];
+        } else {
+            // Ignore non-letter characters
+            ciphertext[i] = plaintext[i];
+        }
+    }
+
+    // Add null terminator to the end of the ciphertext
+    ciphertext[len_plaintext] = '\0';
+
+    // Print the encrypted ciphertext
+    printf("Encrypted ciphertext: %s\n", ciphertext);
+
+    return 0;
+}
