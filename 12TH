@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+
+// Function to check if the key matrix is valid
+int isValidKey(int keyMatrix[][2])
+{
+    // Calculate the determinant of the key matrix
+    int det = keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0];
+    det = det % 26;
+
+    // Check if the determinant is invertible (i.e., gcd(det, 26) = 1)
+    if (det < 0)
+    {
+        det += 26;
+    }
+
+    if (det % 2 == 0 || det % 13 == 0)
+    {
+        return 0; // Key is not valid
+    }
+    else
+    {
+        return 1; // Key is valid
+    }
+}
+
+// Function to get the inverse of a number modulo 26
+int getInverse(int num)
+{
+    int i;
+    for (i = 1; i < 26; i++)
+    {
+        if ((i * num) % 26 == 1)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Function to encrypt the message using the Hill cipher
+void encrypt(char *message, int keyMatrix[][2])
+{
+    int i, j, k, len;
+    int messageVector[2], cipherVector[2];
+    char cipherText[strlen(message) + 1];
+
+    // Calculate the inverse of the key matrix modulo 26
+    int det = keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0];
+    det = det % 26;
+
+    if (det < 0)
+    {
+        det += 26;
+    }
+
+    int detInverse = getInverse(det);
+
+    int inverseKeyMatrix[2][2];
+    inverseKeyMatrix[0][0] = (keyMatrix[1][1] * detInverse) % 26;
+    inverseKeyMatrix[0][1] = (-keyMatrix[0][1] * detInverse) % 26;
+    inverseKeyMatrix[1][0] = (-keyMatrix[1][0] * detInverse) % 26;
+    inverseKeyMatrix[1][1] = (keyMatrix[0][0] * detInverse) % 26;
+
+    // Convert the message to uppercase
+    for (i = 0; message[i] != '\0'; i++)
+    {
+        message[i] = toupper(message[i]);
+    }
+
+    // Remove any spaces from the message
+    len = 0;
+    for (i = 0; message[i] != '\0'; i++)
+    {
+        if (message[i] != ' ')
+        {
+            message[len++] = message[i];
+        }
+    }
+    message[len] = '\0';
+
+    // Pad the message with 'X' if its length is odd
+    if (strlen(message) % 2 == 1)
+    {
+        strcat(message, "X");
+    }
+
+    // Encrypt the message two letters at a time
+    for (i = 0, k = 0; i < strlen(message); i += 2, k++)
+    {
+        // Convert the two letters to a vector
+        messageVector[0] = message[i] - 'A';
+        messageVector[1] = message[i + 1] - 'A';
+
+        // Multiply the vector by the key matrix
