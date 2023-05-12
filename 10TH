@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define ROWS 5
+#define COLS 5
+#define CHARACTERS 26
+
+// Generate the Playfair matrix from the given key
+void generateMatrix(char *key, char matrix[ROWS][COLS]) {
+    int i, j, k;
+    int length = strlen(key);
+    char alphabet[CHARACTERS];
+
+    // Fill the alphabet array with all characters except 'j'
+    k = 0;
+    for (i = 0; i < CHARACTERS; i++) {
+        if (i == 9) {
+            continue;
+        }
+        alphabet[k++] = 'a' + i;
+    }
+
+    // Fill the key into the matrix
+    k = 0;
+    for (i = 0; i < length; i++) {
+        if (key[i] == 'j') {
+            key[i] = 'i';
+        }
+
+        for (j = 0; j < COLS; j++) {
+            if (matrix[k][j] == 0) {
+                matrix[k][j] = key[i];
+                alphabet[key[i] - 'a'] = 0;
+                break;
+            }
+        }
+    }
+
+    // Fill the remaining alphabet into the matrix
+    for (i = 0; i < ROWS; i++) {
+        for (j = 0; j < COLS; j++) {
+            if (matrix[i][j] == 0) {
+                for (k = 0; k < CHARACTERS; k++) {
+                    if (alphabet[k] != 0) {
+                        matrix[i][j] = alphabet[k];
+                        alphabet[k] = 0;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Find the row and column of a given character in the matrix
+void findPosition(char c, char matrix[ROWS][COLS], int *row, int *col) {
+    int i, j;
+    for (i = 0; i < ROWS; i++) {
+        for (j = 0; j < COLS; j++) {
+            if (matrix[i][j] == c) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+
+// Encrypt a pair of characters using the Playfair cipher
+void encryptPair(char a, char b, char matrix[ROWS][COLS], char *result) {
+    int rowA, colA, rowB, colB;
+    findPosition(a, matrix, &rowA, &colA);
+    findPosition(b, matrix, &rowB, &colB);
+
+    if (rowA == rowB) {
+        result[0] = matrix[rowA][(colA + 1) % COLS];
+        result[1] = matrix[rowB][(colB + 1) % COLS];
+    } else if (colA == colB) {
+        result[0] = matrix[(rowA + 1) % ROWS][colA];
+        result[1] = matrix[(rowB + 1) % ROWS][colB];
+    } else {
+        result[0] = matrix[rowA][colB];
+        result[1] = matrix[rowB][colA];
+    }
+}
+
+// Encrypt a message using the Playfair cipher
+void encryptMessage(char *message, char *key, char matrix[ROWS][COLS], char *result) {
+    int i, j;
+    int length
