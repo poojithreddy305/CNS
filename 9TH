@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <string.h>
+
+// Playfair cipher decryption function
+void playfair_decrypt(char message[], char key[]) {
+    // Generate the 5x5 Playfair matrix from the key
+    char matrix[5][5];
+    int index = 0;
+    int used_letters[26] = {0};
+
+    for (int i = 0; i < strlen(key); i++) {
+        char c = key[i];
+        if (c == 'J') {
+            // Replace J with I in the key
+            c = 'I';
+        }
+
+        if (!used_letters[c - 'A']) {
+            matrix[index / 5][index % 5] = c;
+            used_letters[c - 'A'] = 1;
+            index++;
+        }
+    }
+
+    for (char c = 'A'; c <= 'Z'; c++) {
+        if (c == 'J') {
+            // Replace J with I in the matrix
+            continue;
+        }
+
+        if (!used_letters[c - 'A']) {
+            matrix[index / 5][index % 5] = c;
+            used_letters[c - 'A'] = 1;
+            index++;
+        }
+    }
+
+    // Decrypt the message using the Playfair cipher
+    int len_message = strlen(message);
+    for (int i = 0; i < len_message; i += 2) {
+        char c1 = message[i];
+        char c2 = message[i + 1];
+        if (c1 == 'J') {
+            // Replace J with I
+            c1 = 'I';
+        }
+        if (c2 == 'J') {
+            // Replace J with I
+            c2 = 'I';
+        }
+
+        int r1, c1, r2, c2;
+        // Find the row and column of the two letters in the matrix
+        for (int j = 0; j < 5; j++) {
+            for (int k = 0; k < 5; k++) {
+                if (matrix[j][k] == c1) {
+                    r1 = j;
+                    c1 = k;
+                }
+                if (matrix[j][k] == c2) {
+                    r2 = j;
+                    c2 = k;
+                }
+            }
+        }
+
+        // Decrypt the two letters using the Playfair cipher rules
+        if (r1 == r2) {
+            // Same row, shift columns to the left
+            c1 = (c1 - 1 + 5) % 5;
+            c2 = (c2 - 1 + 5) % 5;
+        } else if (c1 == c2) {
+            // Same column, shift rows up
+            r1 = (r1 - 1 + 5) % 5;
+            r2 = (r2 - 1 + 5) % 5;
+        } else {
+            // Otherwise, form a rectangle and swap horizontally
+            int tmp = c1;
+            c1 = c2;
+            c2 = tmp;
+        }
+
+        // Print the decrypted letters
+        printf("%c%c", matrix[r1][c1], matrix[r2][c2]);
+    }
+}
+
+int main() {
+    // Input the ciphertext message and keyword
+    char message[] = "KXJEY UREBE ZWEHE WRYTU HEYFS KREHE GOYFI WTTTU OLKSY CAJPO BOTEI ZONTX BYBNT GONEY CUZWR GDSON SXBOU YWRHE BAA
