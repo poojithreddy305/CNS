@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define ALPHABET_SIZE 26
+
+char *generate_key(int key_length) {
+    char *key = malloc(key_length * sizeof(char));
+
+    srand(time(NULL)); // Set random seed based on current time
+
+    for (int i = 0; i < key_length; i++) {
+        key[i] = rand() % ALPHABET_SIZE; // Generate a random number between 0 and 25
+    }
+
+    return key;
+}
+
+char *encrypt(char *plaintext, char *key, int key_length) {
+    int plaintext_length = strlen(plaintext);
+    char *ciphertext = malloc((plaintext_length + 1) * sizeof(char));
+
+    for (int i = 0; i < plaintext_length; i++) {
+        int shift = key[i % key_length]; // Get the shift value from the key
+
+        // Apply the shift to the plaintext character
+        ciphertext[i] = 'A' + ((plaintext[i] - 'A' + shift) % ALPHABET_SIZE);
+    }
+
+    ciphertext[plaintext_length] = '\0';
+
+    return ciphertext;
+}
+
+int main() {
+    char plaintext[] = "HELLO WORLD";
+    int key_length = strlen(plaintext);
+    char *key = generate_key(key_length);
+    char *ciphertext = encrypt(plaintext, key, key_length);
+
+    printf("Plaintext: %s\n", plaintext);
+    printf("Key: ");
+    for (int i = 0; i < key_length; i++) {
+        printf("%d ", key[i]);
+    }
+    printf("\n");
+    printf("Ciphertext: %s\n", ciphertext);
+
+    free(key);
+    free(ciphertext);
+
+    return 0;
+}
