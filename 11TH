@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int main() {
+    int i;
+    long long keys = 1;
+
+    // Calculate the number of possible keys
+    for (i = 25; i >= 1; i--) {
+        keys *= i;
+    }
+
+    // Output the result
+    printf("The Playfair cipher has approximately %lld possible keys.\n", keys);
+
+    return 0;
+}
