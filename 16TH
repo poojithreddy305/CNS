@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define ALPHABET_SIZE 26
+#define NUM_TOP_PLAINTEXTS 10
+
+void print_top_plaintexts(char* plaintexts[], int plaintext_scores[], int num_plaintexts);
+
+int main() {
+    // Cipher text to be decoded
+    char ciphertext[] = "Zkcoro avrk kcdob kgmro, zkcoro avrk kcdob xzwqvo, zkcoro avrk kcdob gkcdob bo hvsr zewwo";
+    int ciphertext_len = strlen(ciphertext);
+    
+    // Initialize frequency array
+    int freq[ALPHABET_SIZE] = {0};
+    
+    // Calculate letter frequencies in the cipher text
+    for (int i = 0; i < ciphertext_len; i++) {
+        if (isalpha(ciphertext[i])) {
+            freq[tolower(ciphertext[i]) - 'a']++;
+        }
+    }
+    
+    // Determine the most frequent letter in the cipher text
+    int max_freq = 0, max_freq_index = 0;
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        if (freq[i] > max_freq) {
+            max_freq = freq[i];
+            max_freq_index = i;
+        }
+    }
+    
+    // Calculate the offset between the most frequent letter in the cipher text and the letter 'e'
+    int offset = max_freq_index - ('e' - 'a');
+    if (offset < 0) {
+        offset += ALPHABET_SIZE;
+    }
+    
+    // Generate a possible plain text by shifting the letters of the cipher text by the offset
+    char plaintext[ciphertext_len + 1];
+    for (int i = 0; i < ciphertext_len; i++) {
+        if (isalpha(ciphertext[i])) {
+            plaintext[i] = 'a' + ((tolower(ciphertext[i]) - 'a' - offset) % ALPHABET_SIZE + ALPHABET_SIZE) % ALPHABET_SIZE;
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[ciphertext_len] = '\0';
+    
+    // Score the possible plain text
+    int plaintext_score = 0;
+    for (int i = 0; i < ciphertext_len; i++) {
+        if (isalpha(plaintext[i])) {
+            plaintext_score += freq[tolower(plaintext[i]) - 'a'];
+        }
+    }
+    
+    // Initialize an array of possible plain texts
+    char* plaintexts[NUM_TOP_PLAINTEXTS];
+    plaintexts[0] = strdup(plaintext);
+    int plaintext_scores[NUM_TOP_PLAINTEXTS];
+    plaintext_scores[0] = plaintext_score;
+    int num_plaintexts = 1;
+    
+    // Generate more possible plain texts by shifting the letters of the cipher text by other possible offsets
+    for (int shift = 1; shift < ALPHABET_SIZE; shift++) {
+        for (int i = 0; i < ciphertext_len; i++) {
+            if (isalpha(ciphertext[i])) {
+                plaintext[i] = 'a' + ((tolower(ciphertext[i]) - 'a' - shift) % ALPHABET_SIZE + ALPHABET_SIZE) % ALPHABET_SIZE;
+            } else {
+                plaintext[i] = ciphertext[i];
+            }
+        }
+        plaintext[ciphertext_len] = '\0';
+        
+        // Score the possible plain text
+        plaintext_score = 0
