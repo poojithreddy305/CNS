@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+void print_hex(const unsigned char* buffer, size_t length) {
+    for (size_t i = 0; i < length; ++i) {
+        printf("%02x", buffer[i]);
+    }
+    printf("\n");
+}
+
+void encrypt_3des_cbc(const unsigned char* plaintext, size_t plaintext_len, const unsigned char* key, const unsigned char* iv) {
+    DES_cblock key1, key2, key3;
+    DES_key_schedule ks1, ks2, ks3;
+
+    // Set the three 3DES keys (key1 = key2 = key3)
+    memcpy(key1, key, 8);
+    memcpy(key2, key, 8);
+    memcpy(key3, key, 8);
+
+    // Generate the key schedules
+    DES_set_key_unchecked(&key1, &ks1);
+    DES_set_key_unchecked(&key2, &ks2);
+    DES_set_key_unchecked(&key3, &ks3);
+
+    DES_cblock previous_block, encrypted_block;
+    memcpy(previous_block, iv, 8);
+
+    size_t num_blocks = (plaintext_len + 7) / 8; // Round up to the nearest multiple of 8
+    size_t remaining_bytes = plaintext_len;
+
+    for (size_t i = 0; i < num_blocks; ++i) {
+        // Prepare the current block for encryption
+        DES_cblock input_block;
+        if (remaining_bytes >= 8) {
+            memcpy(input_block, plaintext + i * 8, 8);
+            remaining_bytes -= 8;
+        } else {
+            memset(input_block, 0, 8);
+            memcpy(input_block, plaintext + i * 8, remaining_bytes);
+            remaining_bytes = 0;
+        }
+
+        // XOR the current block with the previous encrypted block (CBC)
+        DES_cblock xor_block;
+        for (int j = 0; j < 8; ++j) {
+            xor_block[j] = input_block[j] ^ previous_block[j];
+        }
+
+        // Encrypt the XORed block with 3DES
+        DES_ecb3_encrypt(&xor_block, &encrypted_block, &ks1, &ks2, &ks3, DES_ENCRYPT);
+
+        // Store the encrypted block as the previous block for the next iteration
+        memcpy(previous_block, encrypted_block, 8);
+
+        // Print the encrypted block
+        print_hex(encrypted_block, 8);
+    }
+}
+
+int main() {
+    const unsigned char plaintext[] = "Hello, World!";
+    const size_t plaintext_len = strlen((const char*)plaintext);
+
+    const unsigned char key[] = "0123456789abcdef";
+    const unsigned char iv[] = "fedcba9876543210";
+
+    printf("Plaintext: %s\n", plaintext);
+
+    printf("Encryption in 3DES CBC mode:\n");
+    encrypt_3des_cbc(plaintext, plaintext_len, key, iv);
+
+    return 0;
+}
+
