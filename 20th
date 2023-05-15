@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+void print_hex(const unsigned char* buffer, size_t length) {
+    for (size_t i = 0; i < length; ++i) {
+        printf("%02x", buffer[i]);
+    }
+    printf("\n");
+}
+
+void encrypt_des_ecb(const unsigned char* plaintext, size_t plaintext_len, const unsigned char* key) {
+    DES_cblock des_key;
+    DES_key_schedule key_schedule;
+
+    // Set the DES key
+    memcpy(des_key, key, 8);
+
+    // Generate the key schedule
+    DES_set_key_unchecked(&des_key, &key_schedule);
+
+    size_t num_blocks = (plaintext_len + 7) / 8; // Round up to the nearest multiple of 8
+    size_t remaining_bytes = plaintext_len;
+
+    for (size_t i = 0; i < num_blocks; ++i) {
+        // Prepare the current block for encryption
+        DES_cblock input_block;
+        if (remaining_bytes >= 8) {
+            memcpy(input_block, plaintext + i * 8, 8);
+            remaining_bytes -= 8;
+        } else {
+            memset(input_block, 0, 8);
+            memcpy(input_block, plaintext + i * 8, remaining_bytes);
+            remaining_bytes = 0;
+        }
+
+        // Encrypt the current block with DES
+        DES_ecb_encrypt(&input_block, &input_block, &key_schedule, DES_ENCRYPT);
+
+        // Print the encrypted block
+        print_hex(input_block, 8);
+    }
+}
+
+void decrypt_des_ecb(const unsigned char* ciphertext, size_t ciphertext_len, const unsigned char* key) {
+    DES_cblock des_key;
+    DES_key_schedule key_schedule;
+
+    // Set the DES key
+    memcpy(des_key, key, 8);
+
+    // Generate the key schedule
+    DES_set_key_unchecked(&des_key, &key_schedule);
+
+    size_t num_blocks = ciphertext_len / 8;
+
+    for (size_t i = 0; i < num_blocks; ++i) {
+        DES_cblock input_block;
+        memcpy(input_block, ciphertext + i * 8, 8);
+
+        // Decrypt the current block with DES
+        DES_ecb_encrypt(&input_block, &input_block, &key_schedule, DES_DECRYPT);
+
+        // Print the decrypted block
+        print_hex(input_block, 8);
+    }
+}
+
+int main() {
+    const unsigned char plaintext[] = "Hello, World!";
+    const size_t plaintext_len = strlen((const char*)plaintext);
+
+    const unsigned char key[] = "0123456789abcdef";
+
+    printf("Plaintext: %s\n", plaintext);
+
+    printf("Encryption in DES ECB mode:\n");
+    encrypt_des_ecb(plaintext, plaintext_len, key);
+
+    printf("Decryption in DES ECB mode:\n");
+    const unsigned char ciphertext[] = {0x53, 0x07, 0x9f, 0x18, 0xe9, 0x6c, 0xcd, 0x46, 0x2c, 0x4d, 0x85, 0xa0, 0xa9, 0x3d, 0x2a, 0x1c
